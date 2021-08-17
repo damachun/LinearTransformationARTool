@@ -39,6 +39,7 @@ class HandDetect:
             for landmark_id, landmarks in enumerate(hand_landmarks.landmark):
                 x, y = int(landmarks.x * width), int(landmarks.y * height)
                 self._hand_details.append([hand_index, landmark_id, x, y])
+        self._hand_details.sort(key = lambda sublist: (sublist[0], sublist[1]))
         
         return True
 
