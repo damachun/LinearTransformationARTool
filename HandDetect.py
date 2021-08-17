@@ -9,63 +9,63 @@ class HandDetect:
 
         # required for mp.solutions.hands.Hands()
         # see if it actually needs to be saved
-        self.static_image_mode        = static_image_mode
-        self.max_num_hands            = max_num_hands
-        self.min_detection_confidence = min_detection_confidence
-        self.min_tracking_confidence  = min_tracking_confidence
+        self._static_image_mode        = static_image_mode
+        self._max_num_hands            = max_num_hands
+        self._min_detection_confidence = min_detection_confidence
+        self._min_tracking_confidence  = min_tracking_confidence
         
         # mediapipe hand objects
-        self.hand_pipeline = mp.solutions.hands
-        self.hand_detector = self.hand_pipeline.Hands(
+        self._hand_pipeline = mp.solutions.hands
+        self._hand_detector = self._hand_pipeline.Hands(
             static_image_mode, max_num_hands,
             min_detection_confidence, min_tracking_confidence)
 
         # output objects
-        #self.hand_processed
-        self.hand_details = []
+        self._hand_processed = None
+        self._hand_details = []
 
     def __call__(self, main_image_rgb, height : int, width : int) -> bool:
 
         # process image to get hand
-        self.hand_processed = self.hand_detector.process(main_image_rgb)
+        self._hand_processed = self._hand_detector.process(main_image_rgb)
 
         # edge check
-        if not self.hand_processed.multi_hand_landmarks:
+        if not self._hand_processed.multi_hand_landmarks:
             return False
 
         # update hand details list
-        self.hand_details.clear()
-        for hand_index, hand_landmarks in enumerate(self.hand_processed.multi_hand_landmarks):
+        self._hand_details.clear()
+        for hand_index, hand_landmarks in enumerate(self._hand_processed.multi_hand_landmarks):
             for landmark_id, landmarks in enumerate(hand_landmarks.landmark):
                 x, y = int(landmarks.x * width), int(landmarks.y * height)
-                self.hand_details.append([hand_index, landmark_id, x, y])
+                self._hand_details.append([hand_index, landmark_id, x, y])
         
         return True
 
     def render(self, main_image, render_fn_hand = None, render_fn_details = None):
 
         # edge check
-        if not self.hand_processed.multi_hand_landmarks: return
+        if not self._hand_processed.multi_hand_landmarks: return
         
         # render hand landmark indicator
         if render_fn_hand == None: return
-        for landmarks in self.hand_processed.multi_hand_landmarks:
+        for landmarks in self._hand_processed.multi_hand_landmarks:
             render_fn_hand(main_image, landmarks, 
-                self.hand_pipeline.HAND_CONNECTIONS)
+                self._hand_pipeline.HAND_CONNECTIONS)
 
         # render details above
         if render_fn_details == None: return
-        for _, landmark_id, x, y in self.hand_details:
+        for _, landmark_id, x, y in self._hand_details:
             render_fn_details(main_image, str(int(landmark_id)), (x + 10, y + 10))
 
     # returns 2d array, each element contains (hand index, id, coordinates)
     # const it
     @property
     def get_details(self):
-        return self.hand_details
+        return self._hand_details
 
     def __repr__(self):
-        return "\n".join("Hand: %d, Landmark ID: %d, Coordinates(%d, %d)" % (hand, landmark_id, x, y) for sublist in self.hand_details for hand, landmark_id, x, y in sublist)
+        return "\n".join("Hand: %d, Landmark ID: %d, Coordinates(%d, %d)" % (hand, landmark_id, x, y) for sublist in self._hand_details for hand, landmark_id, x, y in sublist)
 
 if __name__ == "__main__":
     print("Hello")
