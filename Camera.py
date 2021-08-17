@@ -1,5 +1,6 @@
 
 import cv2
+import numpy as np
 
 class Camera:
     def __init__(self, camera_index : int = 0, window_name : str = "Frame"):
@@ -8,7 +9,7 @@ class Camera:
         self._capture_object = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)
         self._window_name = window_name
         cv2.namedWindow(window_name)
-        self._frame = None
+        self._frame = np.zeros(())
 
         self._image_height = 0
         self._image_width = 0
@@ -26,7 +27,7 @@ class Camera:
 
     def convert_image(self, code : int = cv2.COLOR_BGR2RGB):
 
-        return cv2.cvtColor(self._frame, cv2.COLOR_BGR2RGB)
+        return cv2.cvtColor(self._frame, code)
 
     # non const reference, modifiable
     def frame(self):
@@ -55,7 +56,7 @@ if __name__ == "__main__":
     import HandDetect as hd
     import Renderer as rdr
   
-    camera_object = Camera(1)
+    camera_object = Camera(camera_index = 1)
     hand_detector = hd.HandDetect()
     renderer = rdr.Renderer()
   
@@ -63,7 +64,7 @@ if __name__ == "__main__":
         if not camera_object.capture(): break
   
         main_image_rgb = camera_object.convert_image()
-        success = hand_detector(main_image_rgb, camera_object.image_height(), camera_object.image_width())
+        success = hand_detector(main_image_rgb, camera_object.image_height, camera_object.image_width)
         if not success: continue
   
         hand_detector.render(camera_object.frame(), renderer.render_mp, renderer.render_cv2)
