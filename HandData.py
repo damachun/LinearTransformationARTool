@@ -70,34 +70,60 @@ class HandData:
 
     def __repr__(self):
         return ("Initial Offsets:\n\t" + 
-            "Hand: "   + str(self._init_offsets[HandIndices.HAND.value]) +
-            "Thumb: "  + str(self._init_offsets[HandIndices.THUMB.value]) +
-            "Index: "  + str(self._init_offsets[HandIndices.INDEX.value]) +
-            "Middle: " + str(self._init_offsets[HandIndices.MIDDLE.value]) +
-            "Ring: "   + str(self._init_offsets[HandIndices.RING.value]) +
-            "Pinky: "  + str(self._init_offsets[HandIndices.PINKY.value])
-            + "\n" + "Current Offsets:\n\t" + 
-            "Hand: "   + str(self._offsets[HandIndices.HAND.value]) +
-            "Thumb: "  + str(self._offsets[HandIndices.THUMB.value]) +
-            "Index: "  + str(self._offsets[HandIndices.INDEX.value]) +
-            "Middle: " + str(self._offsets[HandIndices.MIDDLE.value]) +
-            "Ring: "   + str(self._offsets[HandIndices.RING.value]) +
-            "Pinky: "  + str(self._offsets[HandIndices.PINKY.value])
+            "Hand: "   + "({:5.2f}, {:5.2f})".format(
+                self._init_offsets[0][0], self._init_offsets[0][1]) + "\n\t" +
+            "Thumb: "  + "({:5.2f}, {:5.2f})".format(
+                self._init_offsets[1][0], self._init_offsets[1][1]) + "\n\t" +
+            "Index: "  + "({:5.2f}, {:5.2f})".format(
+                self._init_offsets[2][0], self._init_offsets[2][1]) + "\n\t" +
+            "Middle: " + "({:5.2f}, {:5.2f})".format(
+                self._init_offsets[3][0], self._init_offsets[3][1]) + "\n\t" +
+            "Ring: "   + "({:5.2f}, {:5.2f})".format(
+                self._init_offsets[4][0], self._init_offsets[4][1]) + "\n\t" +
+            "Pinky: "  + "({:5.2f}, {:5.2f})".format(
+                self._init_offsets[5][0], self._init_offsets[5][1]) + "\n\t" +
 
-            + "\n" + "Previous Positions:\n\t" + 
-            "Hand: "   + str(self._prev_position[HandIndices.HAND.value]) +
-            "Thumb: "  + str(self._prev_position[HandIndices.THUMB.value]) +
-            "Index: "  + str(self._prev_position[HandIndices.INDEX.value]) +
-            "Middle: " + str(self._prev_position[HandIndices.MIDDLE.value]) +
-            "Ring: "   + str(self._prev_position[HandIndices.RING.value]) +
-            "Pinky: "  + str(self._prev_position[HandIndices.PINKY.value])
-            + "\n" + "Current Positions:\n\t" + 
-            "Hand: "   + str(self._position[HandIndices.HAND.value]) +
-            "Thumb: "  + str(self._position[HandIndices.THUMB.value]) +
-            "Index: "  + str(self._position[HandIndices.INDEX.value]) +
-            "Middle: " + str(self._position[HandIndices.MIDDLE.value]) +
-            "Ring: "   + str(self._position[HandIndices.RING.value]) +
-            "Pinky: "  + str(self._position[HandIndices.PINKY.value]))
+            "\n" + "Current Offsets:\n\t" + 
+            "Hand: "   + "({:5.2f}, {:5.2f})".format(
+                self._offsets[0][0], self._offsets[0][1]) + "\n\t" +
+            "Thumb: "  + "({:5.2f}, {:5.2f})".format(
+                self._offsets[1][0], self._offsets[1][1]) + "\n\t" +
+            "Index: "  + "({:5.2f}, {:5.2f})".format(
+                self._offsets[2][0], self._offsets[2][1]) + "\n\t" +
+            "Middle: " + "({:5.2f}, {:5.2f})".format(
+                self._offsets[3][0], self._offsets[3][1]) + "\n\t" +
+            "Ring: "   + "({:5.2f}, {:5.2f})".format(
+                self._offsets[4][0], self._offsets[4][1]) + "\n\t" +
+            "Pinky: "  + "({:5.2f}, {:5.2f})".format(
+                self._offsets[5][0], self._offsets[5][1]) + "\n\t" +
+
+            "\n" + "Previous Positions:\n\t" + 
+            "Hand: "   + "({:5.2f}, {:5.2f})".format(
+                self._prev_position[0][0], self._prev_position[0][1]) + "\n\t" +
+            "Thumb: "  + "({:5.2f}, {:5.2f})".format(
+                self._prev_position[1][0], self._prev_position[1][1]) + "\n\t" +
+            "Index: "  + "({:5.2f}, {:5.2f})".format(
+                self._prev_position[2][0], self._prev_position[2][1]) + "\n\t" +
+            "Middle: " + "({:5.2f}, {:5.2f})".format(
+                self._prev_position[3][0], self._prev_position[3][1]) + "\n\t" +
+            "Ring: "   + "({:5.2f}, {:5.2f})".format(
+                self._prev_position[4][0], self._prev_position[4][1]) + "\n\t" +
+            "Pinky: "  + "({:5.2f}, {:5.2f})".format(
+                self._prev_position[5][0], self._prev_position[5][1]) + "\n\t" +
+
+            "\n" + "Current Positions:\n\t" + 
+            "Hand: "   + "({:5.2f}, {:5.2f})".format(
+                self._position[0][0], self._position[0][1]) + "\n\t" +
+            "Thumb: "  + "({:5.2f}, {:5.2f})".format(
+                self._position[1][0], self._position[1][1]) + "\n\t" +
+            "Index: "  + "({:5.2f}, {:5.2f})".format(
+                self._position[2][0], self._position[2][1]) + "\n\t" +
+            "Middle: " + "({:5.2f}, {:5.2f})".format(
+                self._position[3][0], self._position[3][1]) + "\n\t" +
+            "Ring: "   + "({:5.2f}, {:5.2f})".format(
+                self._position[4][0], self._position[4][1]) + "\n\t" +
+            "Pinky: "  + "({:5.2f}, {:5.2f})".format(
+                self._position[5][0], self._position[5][1]))
 
 if __name__ == "__main__":
     import Camera as cam
