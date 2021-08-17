@@ -1,7 +1,7 @@
 import mediapipe as mp
 
 # functor to detect hands
-class handDetect():
+class HandDetect:
     def __init__(self, static_image_mode : bool = False, 
         max_num_hands : int = 2,
         min_detection_confidence : float = 0.5, 
@@ -9,10 +9,10 @@ class handDetect():
 
         # required for mp.solutions.hands.Hands()
         # see if it actually needs to be saved
-        self.static_image_mode = static_image_mode
-        self.max_num_hands = max_num_hands
+        self.static_image_mode        = static_image_mode
+        self.max_num_hands            = max_num_hands
         self.min_detection_confidence = min_detection_confidence
-        self.min_tracking_confidence = min_tracking_confidence
+        self.min_tracking_confidence  = min_tracking_confidence
         
         # mediapipe hand objects
         self.hand_pipeline = mp.solutions.hands
@@ -42,18 +42,19 @@ class handDetect():
         
         return True
 
-    def render(self, main_image, render_fn_hand, render_fn_details):
+    def render(self, main_image, render_fn_hand = None, render_fn_details = None):
 
         # edge check
-        if not self.hand_processed.multi_hand_landmarks:
-            return
+        if not self.hand_processed.multi_hand_landmarks: return
         
         # render hand landmark indicator
+        if render_fn_hand == None: return
         for landmarks in self.hand_processed.multi_hand_landmarks:
             render_fn_hand(main_image, landmarks, 
                 self.hand_pipeline.HAND_CONNECTIONS)
 
         # render details above
+        if render_fn_details == None: return
         for _, landmark_id, x, y in self.hand_details:
             render_fn_details(main_image, str(int(landmark_id)), (x + 10, y + 10))
 
@@ -62,6 +63,9 @@ class handDetect():
     @property
     def get_details(self):
         return self.hand_details
+
+    def __repr__(self):
+        return "\n".join("Hand: %d, Landmark ID: %d, Coordinates(%d, %d)" % (hand, landmark_id, x, y) for sublist in self.hand_details for hand, landmark_id, x, y in sublist)
 
 if __name__ == "__main__":
     print("Hello")
@@ -75,7 +79,7 @@ if __name__ == "__main__":
             1, (0, 255, 0), 2)
 
     capture_object = cv2.VideoCapture(1, cv2.CAP_DSHOW)
-    hand_detector = handDetect()
+    hand_detector = HandDetect()
 
     while True:
         success, main_image = capture_object.read()
@@ -91,6 +95,8 @@ if __name__ == "__main__":
 
         cv2.imshow("Hand Detector Output", main_image)
 
-        if cv2.waitKey(2) & 0xFF == 27: break
+        key = cv2.waitKey(1) & 0xFF
+        if key == 27: break
 
-    
+    cv2.destroyAllWindows()
+
