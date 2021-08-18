@@ -1,5 +1,6 @@
 from mpl_toolkits import mplot3d
 import numpy as np
+from matplotlib.backends.backend_agg import FigureCanvasAgg
 import matplotlib.pyplot as plt
 from enum import Enum
 import cv2
@@ -22,10 +23,12 @@ class Graph:
         # graph details
         self.__projection = "3d" if dim3 else "2d"
         self.__figure = plt.figure()
+        self.__figure.patch.set_alpha(0.0)
+        self.__canvas = FigureCanvasAgg(self.__figure)
         if dim3:
             self.__graph = self.__figure.add_subplot(111, projection = "3d")
         else:
-            self.__graph = plt
+            self.__graph = self.__figure.add_subplot()
         self.__graph_type = graph_type
 
         # axis details
@@ -92,7 +95,7 @@ class Graph:
     def graph_type(self, graph_type):
         self.__graph_type = graph_type
 
-    def render(self):
+    def render_helper(self):
         if self.__projection == "2d":
             self.__graph.plot(self.__x_equation, self.__y_equation)
         elif self.__projection == "3d":
@@ -104,39 +107,56 @@ class Graph:
                 self.__graph.plot_surface(self.__x_equation, self.__y_equation, self.__z_equation)
             elif self.__graph_type == GraphType.CONTOUR:
                 self.__graph.contour(self.__x_equation, self.__y_equation, self.__z_equation)
-        
+
+    def render(self):
+        self.render_helper()
         plt.show()
 
     def render_to_image(self):
-        if self.__projection == "2d":
-            self.__graph.plot(self.__x_equation, self.__y_equation)
-        elif self.__projection == "3d":
-            if self.__graph_type == GraphType.LINE:
-                self.__graph.plot(self.__x_equation, self.__y_equation, self.__z_equation)
-            elif self.__graph_type == GraphType.WIREFRAME:
-                self.__graph.plot_wireframe(self.__x_equation, self.__y_equation, self.__z_equation)
-            elif self.__graph_type == GraphType.SURFACE:
-                self.__graph.plot_surface(self.__x_equation, self.__y_equation, self.__z_equation)
-            elif self.__graph_type == GraphType.CONTOUR:
-                self.__graph.contour(self.__x_equation, self.__y_equation, self.__z_equation)
+        self.render_helper()
 
-        self.__figure.canvas.draw()
-        plt.show(block = False)
+        self.__canvas.draw()
 
-        img = np.fromstring(self.__figure.canvas.tostring_rgb(), dtype = np.uint8, sep = " ")
-        img = img.reshape(self.__figure.canvas.get_width_height()[::-1] + (4,))
+        mpl_buffer = self.__canvas.buffer_rgba()
+        buffer = np.asarray(mpl_buffer)
 
-        return cv2.cvtColor(img, cv2.COLOR_ARGB2BGRA)
+        img = np.frombuffer(buffer, dtype = np.uint8)
+        img = img.reshape(self.__canvas.get_width_height()[::-1] + (4,))
+
+        img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
+
+        h, w, _ = img.shape
+        img_bgra = np.concatenate([img, np.full((h, w, 1), 255, dtype = np.uint8)], axis = -1)
+
+        mask = np.all(img == [255, 255, 255], axis = -1)
+        img_bgra[mask, -1] = 0
+
+        cv2.imwrite("graph_image.png", img_bgra)
+
+        return img_bgra
 
 if __name__ == "__main__":
     print("Hello")
     graph = Graph()
     graph.graph_type = GraphType.SURFACE
-    graph.render()
-    image = graph.render_to_image()
+
+    bg_image = cv2.cvtColor(cv2.imread("solid_image.jpg"), cv2.COLOR_BGR2BGRA)
+    bg_image_resize = cv2.resize(bg_image, (800, 600), interpolation = cv2.INTER_AREA)
+    graph_image = graph.render_to_image()
+    graph_image_resize = cv2.resize(graph_image, (800, 600), interpolation = cv2.INTER_AREA)
+
+    def blending(bg_image, fg_image):
+        fg_gray = cv2.cvtColor(fg_image, cv2.COLOR_BGRA2GRAY)
+        _, fg_graymask = cv2.threshold(fg_gray, 120, 255, cv2.THRESH_BINARY)
+        bg_or = cv2.bitwise_or(bg_image, bg_image, mask = fg_graymask)
+        fg_graymaskinv = cv2.bitwise_not(fg_gray)
+        fg_maskinv = cv2.bitwise_and(fg_image, fg_image, mask = fg_graymaskinv)
+        return cv2.add(bg_or, fg_maskinv)
+
+    image = blending(bg_image_resize, graph_image_resize)
 
     while True:
-        cv2.imshow("graph", image)
+        cv2.imshow("transparent graph", image)
         key = cv2.waitKey(1) & 0xFF
         if key == 27: break
 
