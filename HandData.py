@@ -37,12 +37,14 @@ class HandData:
                 self._prev_position[i][1] = xy[1]
                 self._position[i][1] = temparray[i][1]
 
-    def offset(self, x_offset, y_offset):
+    def offset(self, x_pos, y_pos):
         self._offsets = np.array([
-            [ sum(x_offset) / len(x_offset), sum(y_offset) / len(y_offset) ], 
-            [ x_offset[4], y_offset[4] ], [ x_offset[8], y_offset[8] ], 
-            [ x_offset[12], y_offset[12] ], [ x_offset[16], y_offset[16] ], 
-            [ x_offset[20], y_offset[20] ]])
+            [ 0.0, 0.0 ], 
+            [ x_pos[4] - x_pos[2], y_pos[4] - y_pos[2] ], 
+            [ x_pos[8] - x_pos[5], y_pos[8] - y_pos[5] ], 
+            [ x_pos[12] - x_pos[9], y_pos[12] - y_pos[9] ], 
+            [ x_pos[16] - x_pos[13], y_pos[16] - y_pos[13] ], 
+            [ x_pos[17] - x_pos[17], y_pos[20] - y_pos[17] ]])
         self._offsets = self._offsets.astype("float64")
 
     # catered specifically for HandDetect hand_details
@@ -50,22 +52,23 @@ class HandData:
         x_pos = [sublist[2] for sublist in all_positions_data]
         y_pos = [sublist[3] for sublist in all_positions_data]
         self.position(x_pos, y_pos)
-        self.offset(
-            [x - x_pos[0] if i > 0 else 0.0 for i, x in enumerate(x_pos)], 
-            [y - y_pos[0] if i > 0 else 0.0 for i, y in enumerate(y_pos)])
+
+        x_offset = [x - x_pos[0] if i > 0 else 0.0 for i, x in enumerate(x_pos)]
+        y_offset = [y - y_pos[0] if i > 0 else 0.0 for i, y in enumerate(y_pos)]
+
+        self.offset(x_pos, y_pos)
 
     def recalibrate_offset(self, all_positions_data):
         x_pos = [sublist[2] for sublist in all_positions_data]
         y_pos = [sublist[3] for sublist in all_positions_data]
 
-        x_offset = [x - x_pos[0] if i > 0 else 0.0 for i, x in enumerate(x_pos)]
-        y_offset = [y - y_pos[0] if i > 0 else 0.0 for i, y in enumerate(y_pos)]
-
         self._reference_offsets = np.array([
-            [ sum(x_offset) / len(x_offset), sum(y_offset) / len(y_offset) ], 
-            [ x_offset[4], y_offset[4] ], [ x_offset[8], y_offset[8] ], 
-            [ x_offset[12], y_offset[12] ], [ x_offset[16], y_offset[16] ], 
-            [ x_offset[20], y_offset[20] ]])
+            [ 0.0, 0.0 ], 
+            [ x_pos[4] - x_pos[2], y_pos[4] - y_pos[2] ], 
+            [ x_pos[8] - x_pos[5], y_pos[8] - y_pos[5] ], 
+            [ x_pos[12] - x_pos[9], y_pos[12] - y_pos[9] ], 
+            [ x_pos[16] - x_pos[13], y_pos[16] - y_pos[13] ], 
+            [ x_pos[17] - x_pos[17], y_pos[20] - y_pos[17] ]])
         self._reference_offsets = self._reference_offsets.astype("float64")
 
     def __repr__(self):
