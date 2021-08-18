@@ -17,18 +17,18 @@ class Renderer:
     cv2_text_thickness : int = 1):
 
         # mediapipe renderer
-        self._mp_renderer     = mp.solutions.drawing_utils
+        self.__mp_renderer     = mp.solutions.drawing_utils
           # mediapipe line
-        self._mp_line_specs   = self._mp_renderer.DrawingSpec(mp_line_color,  mp_line_thickness)
+        self.__mp_line_specs   = self.__mp_renderer.DrawingSpec(mp_line_color,  mp_line_thickness)
           # mediapipe circle
-        self._mp_circle_specs = self._mp_renderer.DrawingSpec(mp_circle_color,    mp_circle_thickness, mp_circle_radius)
+        self.__mp_circle_specs = self.__mp_renderer.DrawingSpec(mp_circle_color,    mp_circle_thickness, mp_circle_radius)
 
         # opencv renderer
           # opencv text
-        self._cv2_text_font      = cv2_text_font
-        self._cv2_text_scale     = cv2_text_scale
-        self._cv2_text_color     = cv2_text_color
-        self._cv2_text_thickness = cv2_text_thickness
+        self.__cv2_text_font      = cv2_text_font
+        self.__cv2_text_scale     = cv2_text_scale
+        self.__cv2_text_color     = cv2_text_color
+        self.__cv2_text_thickness = cv2_text_thickness
 
   
     def __repr__(self):
@@ -37,30 +37,30 @@ class Renderer:
     def edit_mp_line(self,
     mp_line_color : Tuple[int, int, int] = (255, 0, 0),
     mp_line_thickness : int = 1):
-        self._mp_line_specs = self._mp_renderer.DrawingSpec(mp_line_color, mp_line_thickness)
+        self.__mp_line_specs = self.__mp_renderer.DrawingSpec(mp_line_color, mp_line_thickness)
 
     def edit_mp_circle(self, 
     mp_circle_color : Tuple[int, int, int] = (0, 0, 255),
     mp_circle_thickness : int = 1,
     mp_circle_radius : int = 1):
-        self._mp_circle_specs = self._mp_renderer.DrawingSpec(mp_circle_color, mp_circle_thickness, mp_circle_radius)
+        self.__mp_circle_specs = self.__mp_renderer.DrawingSpec(mp_circle_color, mp_circle_thickness, mp_circle_radius)
 
     def edit_cv2_text(self, cv2_text_font = cv2.FONT_HERSHEY_PLAIN,
     cv2_text_scale : float = 1.0,
     cv2_text_color : Tuple[int, int, int] = (0, 0, 255),
     cv2_text_thickness : int = 1):
-        self._cv2_text_font      = cv2_text_font
-        self._cv2_text_scale     = cv2_text_scale
-        self._cv2_text_color     = cv2_text_color
-        self._cv2_text_thickness = cv2_text_thickness
+        self.__cv2_text_font      = cv2_text_font
+        self.__cv2_text_scale     = cv2_text_scale
+        self.__cv2_text_color     = cv2_text_color
+        self.__cv2_text_thickness = cv2_text_thickness
 
     def render_mp(self, main_image, landmarks, flags):
-        self._mp_renderer.draw_landmarks(main_image, landmarks, flags,
-        self._mp_line_specs, self._mp_circle_specs)
+        self.__mp_renderer.draw_landmarks(main_image, landmarks, flags,
+        self.__mp_line_specs, self.__mp_circle_specs)
 
     def render_cv2(self, main_image, text, position):
-        cv2.putText(main_image, text, position, self._cv2_text_font,
-        self._cv2_text_scale, self._cv2_text_color, self._cv2_text_thickness)
+        cv2.putText(main_image, text, position, self.__cv2_text_font,
+        self.__cv2_text_scale, self.__cv2_text_color, self.__cv2_text_thickness)
 
 if __name__ == "__main__":
     import HandDetect as hd

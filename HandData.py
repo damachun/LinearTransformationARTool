@@ -12,14 +12,14 @@ class HandIndices(Enum):
 class HandData:
     def __init__(self, threshold : float = 10.0):
         # raw positions -> can retrieve via hand indices enum
-        self._position  = np.zeros((6, 2), dtype = float)
-        self._offsets   = np.zeros((6, 2), dtype = float)
+        self.__position  = np.zeros((6, 2), dtype = float)
+        self.__offsets   = np.zeros((6, 2), dtype = float)
 
         # reference data
-        self._prev_position = np.zeros((6, 2), dtype = float)
-        self._reference_offsets = np.zeros((6, 2), dtype = float)
+        self.__prev_position = np.zeros((6, 2), dtype = float)
+        self.__reference_offsets = np.zeros((6, 2), dtype = float)
 
-        self._threshold = threshold
+        self.__threshold = threshold
 
     def position(self, x_pos, y_pos):
         temparray = np.array([
@@ -29,23 +29,23 @@ class HandData:
             [ x_pos[20], y_pos[20] ]])
         temparray = temparray.astype("float64")
 
-        for i, xy in enumerate(self._position):
-            if abs(temparray[i][0] - xy[0]) > self._threshold:
-                self._prev_position[i][0] = xy[0]
-                self._position[i][0] = temparray[i][0]
-            if abs(temparray[i][1] - xy[1]) > self._threshold:
-                self._prev_position[i][1] = xy[1]
-                self._position[i][1] = temparray[i][1]
+        for i, xy in enumerate(self.__position):
+            if abs(temparray[i][0] - xy[0]) > self.__threshold:
+                self.__prev_position[i][0] = xy[0]
+                self.__position[i][0] = temparray[i][0]
+            if abs(temparray[i][1] - xy[1]) > self.__threshold:
+                self.__prev_position[i][1] = xy[1]
+                self.__position[i][1] = temparray[i][1]
 
     def offset(self, x_pos, y_pos):
-        self._offsets = np.array([
+        self.__offsets = np.array([
             [ 0.0, 0.0 ], 
             [ x_pos[4] - x_pos[2], y_pos[4] - y_pos[2] ], 
             [ x_pos[8] - x_pos[5], y_pos[8] - y_pos[5] ], 
             [ x_pos[12] - x_pos[9], y_pos[12] - y_pos[9] ], 
             [ x_pos[16] - x_pos[13], y_pos[16] - y_pos[13] ], 
             [ x_pos[17] - x_pos[17], y_pos[20] - y_pos[17] ]])
-        self._offsets = self._offsets.astype("float64")
+        self.__offsets = self.__offsets.astype("float64")
 
     # catered specifically for HandDetect hand_details
     def update(self, all_positions_data):
@@ -62,71 +62,71 @@ class HandData:
         x_pos = [sublist[2] for sublist in all_positions_data]
         y_pos = [sublist[3] for sublist in all_positions_data]
 
-        self._reference_offsets = np.array([
+        self.__reference_offsets = np.array([
             [ 0.0, 0.0 ], 
             [ x_pos[4] - x_pos[2], y_pos[4] - y_pos[2] ], 
             [ x_pos[8] - x_pos[5], y_pos[8] - y_pos[5] ], 
             [ x_pos[12] - x_pos[9], y_pos[12] - y_pos[9] ], 
             [ x_pos[16] - x_pos[13], y_pos[16] - y_pos[13] ], 
             [ x_pos[17] - x_pos[17], y_pos[20] - y_pos[17] ]])
-        self._reference_offsets = self._reference_offsets.astype("float64")
+        self.__reference_offsets = self.__reference_offsets.astype("float64")
 
     def __repr__(self):
         return ("Reference Offsets:\n\t" + 
             "Hand: "   + "({:5.2f}, {:5.2f})".format(
-                self._reference_offsets[0][0], self._reference_offsets[0][1]) + "\n\t" +
+                self.__reference_offsets[0][0], self.__reference_offsets[0][1]) + "\n\t" +
             "Thumb: "  + "({:5.2f}, {:5.2f})".format(
-                self._reference_offsets[1][0], self._reference_offsets[1][1]) + "\n\t" +
+                self.__reference_offsets[1][0], self.__reference_offsets[1][1]) + "\n\t" +
             "Index: "  + "({:5.2f}, {:5.2f})".format(
-                self._reference_offsets[2][0], self._reference_offsets[2][1]) + "\n\t" +
+                self.__reference_offsets[2][0], self.__reference_offsets[2][1]) + "\n\t" +
             "Middle: " + "({:5.2f}, {:5.2f})".format(
-                self._reference_offsets[3][0], self._reference_offsets[3][1]) + "\n\t" +
+                self.__reference_offsets[3][0], self.__reference_offsets[3][1]) + "\n\t" +
             "Ring: "   + "({:5.2f}, {:5.2f})".format(
-                self._reference_offsets[4][0], self._reference_offsets[4][1]) + "\n\t" +
+                self.__reference_offsets[4][0], self.__reference_offsets[4][1]) + "\n\t" +
             "Pinky: "  + "({:5.2f}, {:5.2f})".format(
-                self._reference_offsets[5][0], self._reference_offsets[5][1]) + "\n\t" +
+                self.__reference_offsets[5][0], self.__reference_offsets[5][1]) + "\n\t" +
 
             "\n" + "Current Offsets:\n\t" + 
             "Hand: "   + "({:5.2f}, {:5.2f})".format(
-                self._offsets[0][0], self._offsets[0][1]) + "\n\t" +
+                self.__offsets[0][0], self.__offsets[0][1]) + "\n\t" +
             "Thumb: "  + "({:5.2f}, {:5.2f})".format(
-                self._offsets[1][0], self._offsets[1][1]) + "\n\t" +
+                self.__offsets[1][0], self.__offsets[1][1]) + "\n\t" +
             "Index: "  + "({:5.2f}, {:5.2f})".format(
-                self._offsets[2][0], self._offsets[2][1]) + "\n\t" +
+                self.__offsets[2][0], self.__offsets[2][1]) + "\n\t" +
             "Middle: " + "({:5.2f}, {:5.2f})".format(
-                self._offsets[3][0], self._offsets[3][1]) + "\n\t" +
+                self.__offsets[3][0], self.__offsets[3][1]) + "\n\t" +
             "Ring: "   + "({:5.2f}, {:5.2f})".format(
-                self._offsets[4][0], self._offsets[4][1]) + "\n\t" +
+                self.__offsets[4][0], self.__offsets[4][1]) + "\n\t" +
             "Pinky: "  + "({:5.2f}, {:5.2f})".format(
-                self._offsets[5][0], self._offsets[5][1]) + "\n\t" +
+                self.__offsets[5][0], self.__offsets[5][1]) + "\n\t" +
 
             "\n" + "Previous Positions:\n\t" + 
             "Hand: "   + "({:5.2f}, {:5.2f})".format(
-                self._prev_position[0][0], self._prev_position[0][1]) + "\n\t" +
+                self.__prev_position[0][0], self.__prev_position[0][1]) + "\n\t" +
             "Thumb: "  + "({:5.2f}, {:5.2f})".format(
-                self._prev_position[1][0], self._prev_position[1][1]) + "\n\t" +
+                self.__prev_position[1][0], self.__prev_position[1][1]) + "\n\t" +
             "Index: "  + "({:5.2f}, {:5.2f})".format(
-                self._prev_position[2][0], self._prev_position[2][1]) + "\n\t" +
+                self.__prev_position[2][0], self.__prev_position[2][1]) + "\n\t" +
             "Middle: " + "({:5.2f}, {:5.2f})".format(
-                self._prev_position[3][0], self._prev_position[3][1]) + "\n\t" +
+                self.__prev_position[3][0], self.__prev_position[3][1]) + "\n\t" +
             "Ring: "   + "({:5.2f}, {:5.2f})".format(
-                self._prev_position[4][0], self._prev_position[4][1]) + "\n\t" +
+                self.__prev_position[4][0], self.__prev_position[4][1]) + "\n\t" +
             "Pinky: "  + "({:5.2f}, {:5.2f})".format(
-                self._prev_position[5][0], self._prev_position[5][1]) + "\n\t" +
+                self.__prev_position[5][0], self.__prev_position[5][1]) + "\n\t" +
 
             "\n" + "Current Positions:\n\t" + 
             "Hand: "   + "({:5.2f}, {:5.2f})".format(
-                self._position[0][0], self._position[0][1]) + "\n\t" +
+                self.__position[0][0], self.__position[0][1]) + "\n\t" +
             "Thumb: "  + "({:5.2f}, {:5.2f})".format(
-                self._position[1][0], self._position[1][1]) + "\n\t" +
+                self.__position[1][0], self.__position[1][1]) + "\n\t" +
             "Index: "  + "({:5.2f}, {:5.2f})".format(
-                self._position[2][0], self._position[2][1]) + "\n\t" +
+                self.__position[2][0], self.__position[2][1]) + "\n\t" +
             "Middle: " + "({:5.2f}, {:5.2f})".format(
-                self._position[3][0], self._position[3][1]) + "\n\t" +
+                self.__position[3][0], self.__position[3][1]) + "\n\t" +
             "Ring: "   + "({:5.2f}, {:5.2f})".format(
-                self._position[4][0], self._position[4][1]) + "\n\t" +
+                self.__position[4][0], self.__position[4][1]) + "\n\t" +
             "Pinky: "  + "({:5.2f}, {:5.2f})".format(
-                self._position[5][0], self._position[5][1]))
+                self.__position[5][0], self.__position[5][1]))
 
 if __name__ == "__main__":
     import Camera as cam

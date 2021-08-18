@@ -6,51 +6,51 @@ class Camera:
     def __init__(self, camera_index : int = 0, window_name : str = "Frame"):
 
         # capture details
-        self._capture_object = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)
-        self._window_name = window_name
+        self.__capture_object = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)
+        self.__window_name = window_name
         cv2.namedWindow(window_name)
-        self._frame = np.zeros(())
+        self.__frame = np.zeros(())
 
-        self._image_height = 0
-        self._image_width = 0
+        self.__image_height = 0
+        self.__image_width = 0
 
     def __del__(self):
-        if self._window_name:
-            cv2.destroyWindow(self._window_name)
+        if self.__window_name:
+            cv2.destroyWindow(self.__window_name)
 
     def capture(self) -> bool:
 
-        retval, self._frame = self._capture_object.read()
+        retval, self.__frame = self.__capture_object.read()
         if retval:
-            self._image_height, self._image_width, _ = self._frame.shape
+            self.__image_height, self.__image_width, _ = self.__frame.shape
         return retval
 
     def convert_image(self, code : int = cv2.COLOR_BGR2RGB):
 
-        return cv2.cvtColor(self._frame, code)
+        return cv2.cvtColor(self.__frame, code)
 
     # non const reference, modifiable
     def frame(self):
-        return self._frame
+        return self.__frame
 
     @property
     def image_height(self):
-        return self._image_height
+        return self.__image_height
 
     @image_height.setter
     def image_height(self, image_height):
-        self._image_height = image_height
+        self.__image_height = image_height
 
     @property
     def image_width(self):
-        return self._image_width
+        return self.__image_width
 
     @image_width.setter
     def image_width(self, image_width):
-        self._image_width = image_width
+        self.__image_width = image_width
 
     def display_image(self):
-        cv2.imshow(self._window_name, self._frame)
+        cv2.imshow(self.__window_name, self.__frame)
 
 if __name__ == "__main__":
     import HandDetect as hd
