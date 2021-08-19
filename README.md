@@ -20,7 +20,9 @@ External Libraries: **cv2**, **numpy**
 A camera class that connects to a user specified webcam and handles the rendering onto the window
 
 ## HandData module
-External Libraries: **enum**, **numpy**
+External Libraries: **enum**, **numpy**, **typing**
+
+References: [Finger Open Logic](https://gist.github.com/TheJLifeX/74958cc59db477a91837244ff598ef4a)
 
 Specialised for the _hand_details object in HandDetect, it stores the following data: reference offset, current offset, previous positions, current positions. The data updates are handled against a user specified treshold, and recalibration of the reference offset is available
 
