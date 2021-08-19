@@ -107,15 +107,14 @@ class Graph:
                 self.__graph.plot_surface(self.__x_equation, self.__y_equation, self.__z_equation)
             elif self.__graph_type == GraphType.CONTOUR:
                 self.__graph.contour(self.__x_equation, self.__y_equation, self.__z_equation)
+        self.__canvas.draw()
 
-    def render(self):
+    def render(self, block = False):
         self.render_helper()
-        plt.show()
+        plt.show(block)
 
     def render_to_image(self):
         self.render_helper()
-
-        self.__canvas.draw()
 
         mpl_buffer = self.__canvas.buffer_rgba()
         buffer = np.asarray(mpl_buffer)
@@ -134,6 +133,8 @@ class Graph:
         cv2.imwrite("graph_image.png", img_bgra)
 
         return img_bgra
+
+    
 
 if __name__ == "__main__":
     print("Hello")

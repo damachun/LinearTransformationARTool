@@ -37,8 +37,8 @@ class HandDetect:
         self.__hand_details.clear()
         for hand_index, hand_landmarks in enumerate(self.__hand_processed.multi_hand_landmarks):
             for landmark_id, landmarks in enumerate(hand_landmarks.landmark):
-                x, y = int(landmarks.x * width), int(landmarks.y * height)
-                self.__hand_details.append([hand_index, landmark_id, x, y])
+                x, y, z = float(landmarks.x * width), float(landmarks.y * height), float(landmarks.z)
+                self.__hand_details.append([hand_index, landmark_id, x, y, z])
         self.__hand_details.sort(key = lambda sublist: (sublist[0], sublist[1]))
         
         return True
@@ -56,17 +56,17 @@ class HandDetect:
 
         # render details above
         if render_fn_details == None: return
-        for _, landmark_id, x, y in self.__hand_details:
-            render_fn_details(main_image, str(int(landmark_id)), (x + 10, y + 10))
+        for _, landmark_id, x, y, __ in self.__hand_details:
+            render_fn_details(main_image, str(int(landmark_id)), (int(x) + 10, int(y) + 10))
 
-    # returns 2d array, each element contains (hand index, id, coordinates)
+    # returns 2d array, each element contains (hand index, id, coordinates (3d))
     # const it
     @property
     def get_details(self):
         return self.__hand_details
 
     def __repr__(self):
-        return "\n".join("Hand: %d, Landmark ID: %d, Coordinates(%d, %d)" % (hand, landmark_id, x, y) for sublist in self.__hand_details for hand, landmark_id, x, y in sublist)
+        return "\n".join("Hand: %d, Landmark ID: %d, Coordinates(%5.2f, %5.2f, %5.2f)" % (hand, landmark_id, x, y, z) for hand, landmark_id, x, y, z in self.__hand_details)
 
 if __name__ == "__main__":
     print("Hello")
@@ -98,6 +98,7 @@ if __name__ == "__main__":
 
         key = cv2.waitKey(1) & 0xFF
         if key == 27: break
+        elif key == ord("q"): print(repr(hand_detector))
 
     cv2.destroyAllWindows()
 

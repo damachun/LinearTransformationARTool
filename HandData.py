@@ -19,6 +19,7 @@ class HandData:
             HandIndices.RING   : np.zeros((3, 1), dtype = float),
             HandIndices.PINKY  : np.zeros((3, 1), dtype = float) }
         #self.__offsets   = np.zeros((21, 2), dtype = float)
+        self.__hand_pos = np.zeros((3), dtype = float)
 
         # reference data
         self.__prev_position = { 
@@ -27,6 +28,7 @@ class HandData:
             HandIndices.MIDDLE : np.zeros((3, 1), dtype = float),
             HandIndices.RING   : np.zeros((3, 1), dtype = float),
             HandIndices.PINKY  : np.zeros((3, 1), dtype = float) }
+        self.__prev_hand_pos = np.zeros((3), dtype = float)
         #self.__reference_offsets = np.zeros((21, 2), dtype = float)
         self.__active = { 
             HandIndices.THUMB  : False,
@@ -36,6 +38,22 @@ class HandData:
             HandIndices.PINKY  : False }
 
         self.__threshold = threshold
+
+    @property
+    def hand_pos(self):
+        return self.__hand_pos
+
+    @hand_pos.setter
+    def hand_pos(self, hand_pos):
+        self.__hand_pos = hand_pos
+
+    @property
+    def prev_hand_pos(self):
+        return self.__prev_hand_pos
+
+    @prev_hand_pos.setter
+    def prev_hand_pos(self, prev_hand_pos):
+        self.__prev_hand_pos = prev_hand_pos
 
     def position(self, x_pos, y_pos):
         temparray = np.zeros((21, 2), dtype = float)
@@ -52,6 +70,16 @@ class HandData:
                 if abs(temparray[num_idx + add][coord_idx] - self.__position[hand_idx][add]) > self.__threshold:
                     self.__prev_position[hand_idx][add], self.__position[hand_idx][add] = self.__position[hand_idx][add], temparray[num_idx + add][coord_idx]
 
+    def hand_position(self, x_pos, y_pos, z_pos):
+        temparray = np.zeros((3), dtype = float)
+        temparray[0] = sum(x_pos) / len(x_pos)
+        temparray[1] = sum(y_pos) / len(y_pos)
+        temparray[2] = sum(z_pos) / len(z_pos)
+
+        for i in range(3):
+            if abs(temparray[i] - self.__hand_pos[i]) > self.__threshold:
+                self.__prev_hand_pos[i], self.__hand_pos[i] = self.__hand_pos[i], temparray[i]
+
     def activity(self):
         for hand_index, position_set in self.__position.items():
             self.__active[hand_index] = (position_set[1] < position_set[0]) and (position_set[2] < position_set[0])
@@ -60,7 +88,9 @@ class HandData:
     def update(self, all_positions_data):
         x_pos = [sublist[2] for sublist in all_positions_data]
         y_pos = [sublist[3] for sublist in all_positions_data]
+        z_pos = [sublist[4] for sublist in all_positions_data]
         self.position(x_pos, y_pos)
+        self.hand_position(x_pos, y_pos, z_pos)
         self.activity()
 
     def finger_active(self, finger_index = HandIndices.THUMB):
@@ -82,6 +112,8 @@ class HandData:
             "Middle: " + str(self.__active[HandIndices.MIDDLE]) + "\n\t" +
             "Ring: "   + str(self.__active[HandIndices.RING])   + "\n\t" +
             "Pinky: "  + str(self.__active[HandIndices.PINKY]))
+        prev_hand_pos_str = "Hand Position: (%5.2f, %5.2f, %5.2f)" % (self.__prev_hand_pos[0], self.__prev_hand_pos[1], self.__prev_hand_pos[2])
+        hand_pos_str = "Hand Position: (%5.2f, %5.2f, %5.2f)" % (self.__hand_pos[0], self.__hand_pos[1], self.__hand_pos[2])
         previous_pos_str = "Previous Positions:\n\t" + "\n\t".join(
             ("%-18s + %d: (%5.2f)" % (
             str(hand_index), index, prev_xy))
@@ -93,7 +125,11 @@ class HandData:
             for hand_index in HandIndices
             for index, curr_xy in enumerate(self.__prev_position[hand_index]))
 
-        return (hand_activity_str + "\n\n" + previous_pos_str + "\n\n" + pos_str + "\n\n")
+        return (hand_activity_str + "\n\n" + 
+                prev_hand_pos_str + "\n\n" +
+                hand_pos_str      + "\n\n" +
+                previous_pos_str  + "\n\n" + 
+                pos_str + "\n\n")
 
 if __name__ == "__main__":
     import Camera as cam
