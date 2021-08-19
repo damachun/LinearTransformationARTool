@@ -10,7 +10,7 @@ class HandIndices(Tuple[int, int], Enum):
     PINKY  = (1, 18 ) # 18 to 20
 
 class HandData:
-    def __init__(self, threshold : float = 10.0):
+    def __init__(self, threshold : float = 10.0, z_threshold : float = 0.001):
         # raw positions -> can retrieve via hand indices enum
         self.__position = { 
             HandIndices.THUMB  : np.zeros((3, 1), dtype = float),
@@ -38,6 +38,7 @@ class HandData:
             HandIndices.PINKY  : False }
 
         self.__threshold = threshold
+        self.__z_threshold = z_threshold
 
     @property
     def hand_pos(self):
@@ -76,9 +77,11 @@ class HandData:
         temparray[1] = sum(y_pos) / len(y_pos)
         temparray[2] = sum(z_pos) / len(z_pos)
 
-        for i in range(3):
+        for i in range(2):
             if abs(temparray[i] - self.__hand_pos[i]) > self.__threshold:
                 self.__prev_hand_pos[i], self.__hand_pos[i] = self.__hand_pos[i], temparray[i]
+        if abs(temparray[2] - self.__hand_pos[2]) > self.__z_threshold:
+                self.__prev_hand_pos[2], self.__hand_pos[2] = self.__hand_pos[2], temparray[2]
 
     def activity(self):
         for hand_index, position_set in self.__position.items():
@@ -112,7 +115,7 @@ class HandData:
             "Middle: " + str(self.__active[HandIndices.MIDDLE]) + "\n\t" +
             "Ring: "   + str(self.__active[HandIndices.RING])   + "\n\t" +
             "Pinky: "  + str(self.__active[HandIndices.PINKY]))
-        prev_hand_pos_str = "Hand Position: (%5.2f, %5.2f, %5.2f)" % (self.__prev_hand_pos[0], self.__prev_hand_pos[1], self.__prev_hand_pos[2])
+        prev_hand_pos_str = "Previous Hand Position: (%5.2f, %5.2f, %5.2f)" % (self.__prev_hand_pos[0], self.__prev_hand_pos[1], self.__prev_hand_pos[2])
         hand_pos_str = "Hand Position: (%5.2f, %5.2f, %5.2f)" % (self.__hand_pos[0], self.__hand_pos[1], self.__hand_pos[2])
         previous_pos_str = "Previous Positions:\n\t" + "\n\t".join(
             ("%-18s + %d: (%5.2f)" % (
