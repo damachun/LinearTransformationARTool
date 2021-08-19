@@ -9,8 +9,17 @@ class HandIndices(Tuple[int, int], Enum):
     RING   = (1, 14 ) # 14 to 16
     PINKY  = (1, 18 ) # 18 to 20
 
+class Directions(Enum):
+    FRONT = 0
+    BACK  = 1
+    LEFT  = 2
+    RIGHT = 3
+    UP    = 4
+    DOWN  = 5
+
 class HandData:
-    def __init__(self, threshold : float = 10.0, z_threshold : float = 0.001):
+    def __init__(self, threshold : float = 10.0, z_threshold : float = 0.001,
+        move_threshold : float = 2.0, move_z_threshold : float = 0.00001):
         # raw positions -> can retrieve via hand indices enum
         self.__position = { 
             HandIndices.THUMB  : np.zeros((3, 1), dtype = float),
@@ -30,15 +39,27 @@ class HandData:
             HandIndices.PINKY  : np.zeros((3, 1), dtype = float) }
         self.__prev_hand_pos = np.zeros((3), dtype = float)
         #self.__reference_offsets = np.zeros((21, 2), dtype = float)
+
+        # logic data
         self.__active = { 
             HandIndices.THUMB  : False,
             HandIndices.INDEX  : False,
             HandIndices.MIDDLE : False,
             HandIndices.RING   : False,
             HandIndices.PINKY  : False }
+        self.__directions = {
+            Directions.FRONT : False,
+            Directions.BACK  : False,
+            Directions.LEFT  : False,
+            Directions.RIGHT : False,
+            Directions.UP    : False,
+            Directions.DOWN  : False,
+        }
 
         self.__threshold = threshold
         self.__z_threshold = z_threshold
+        self.__move_threshold = move_threshold
+        self.__move_z_threshold = move_z_threshold
 
     @property
     def hand_pos(self):
@@ -55,6 +76,22 @@ class HandData:
     @prev_hand_pos.setter
     def prev_hand_pos(self, prev_hand_pos):
         self.__prev_hand_pos = prev_hand_pos
+
+    @property
+    def active(self):
+        return self.__active
+
+    @active.setter
+    def active(self, active):
+        self.__active = active
+
+    @property
+    def directions(self):
+        return self.__directions
+
+    @directions.setter
+    def directions(self, directions):
+        self.__directions = directions
 
     def position(self, x_pos, y_pos):
         temparray = np.zeros((21, 2), dtype = float)
@@ -87,6 +124,19 @@ class HandData:
         for hand_index, position_set in self.__position.items():
             self.__active[hand_index] = (position_set[1] < position_set[0]) and (position_set[2] < position_set[0])
 
+    def movement(self):
+        x_axis = self.__hand_pos[0] - self.__prev_hand_pos[0]
+        self.__directions[Directions.LEFT]  = x_axis < -self.__move_threshold
+        self.__directions[Directions.RIGHT] = x_axis >  self.__move_threshold
+
+        y_axis = self.__hand_pos[1] - self.__prev_hand_pos[1]
+        self.__directions[Directions.UP]   = y_axis < -self.__move_threshold
+        self.__directions[Directions.DOWN] = y_axis >  self.__move_threshold
+
+        z_axis = self.__hand_pos[2] - self.__prev_hand_pos[2]
+        self.__directions[Directions.FRONT] = z_axis < -self.__move_z_threshold
+        self.__directions[Directions.BACK]  = z_axis > self.__move_z_threshold
+
     # catered specifically for HandDetect hand_details
     def update(self, all_positions_data):
         x_pos = [sublist[2] for sublist in all_positions_data]
@@ -95,18 +145,7 @@ class HandData:
         self.position(x_pos, y_pos)
         self.hand_position(x_pos, y_pos, z_pos)
         self.activity()
-
-    def finger_active(self, finger_index = HandIndices.THUMB):
-        return self.__active[finger_index]
-
-    def finger_active_data(self) -> int:
-        return ("Hand Activity:\n\t" +
-            "Thumb: "  + str(self.__active[HandIndices.THUMB])  + "\n\t" +
-            "Index: "  + str(self.__active[HandIndices.INDEX])  + "\n\t" +
-            "Middle: " + str(self.__active[HandIndices.MIDDLE]) + "\n\t" +
-            "Ring: "   + str(self.__active[HandIndices.RING])   + "\n\t" +
-            "Pinky: "  + str(self.__active[HandIndices.PINKY]))
-            #sum(self.__active.values()) 
+        self.movement()
 
     def __repr__(self):
         hand_activity_str = ("Hand Activity:\n\t" +
@@ -115,6 +154,13 @@ class HandData:
             "Middle: " + str(self.__active[HandIndices.MIDDLE]) + "\n\t" +
             "Ring: "   + str(self.__active[HandIndices.RING])   + "\n\t" +
             "Pinky: "  + str(self.__active[HandIndices.PINKY]))
+        hand_movement_str = ("Hand Movement:\n\t" +
+            "Front: "  + str(self.__directions[Directions.FRONT]) + "\n\t" +
+            "Back: "  + str(self.__directions[Directions.BACK])  + "\n\t" +
+            "Left: " + str(self.__directions[Directions.LEFT])  + "\n\t" +
+            "Right: "   + str(self.__directions[Directions.RIGHT]) + "\n\t" +
+            "Up: "   + str(self.__directions[Directions.UP])    + "\n\t" +
+            "Down: "  + str(self.__directions[Directions.DOWN ]))
         prev_hand_pos_str = "Previous Hand Position: (%5.2f, %5.2f, %5.2f)" % (self.__prev_hand_pos[0], self.__prev_hand_pos[1], self.__prev_hand_pos[2])
         hand_pos_str = "Hand Position: (%5.2f, %5.2f, %5.2f)" % (self.__hand_pos[0], self.__hand_pos[1], self.__hand_pos[2])
         previous_pos_str = "Previous Positions:\n\t" + "\n\t".join(
@@ -129,6 +175,7 @@ class HandData:
             for index, curr_xy in enumerate(self.__prev_position[hand_index]))
 
         return (hand_activity_str + "\n\n" + 
+                hand_movement_str + "\n\n" +
                 prev_hand_pos_str + "\n\n" +
                 hand_pos_str      + "\n\n" +
                 previous_pos_str  + "\n\n" + 
@@ -161,5 +208,4 @@ if __name__ == "__main__":
         key = cv2.waitKey(1) & 0xFF
         if key == 27: break
         elif key == ord("q"): print(repr(hand_data))
-        #elif key == ord("w"): hand_data.recalibrate_offset(hand_detector.get_details)
-        elif key == ord("e"): print(hand_data.finger_active_data())
+        elif key == ord("w"): print(sum(hand_data.active.values()))
