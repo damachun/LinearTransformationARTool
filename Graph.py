@@ -4,12 +4,19 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 import matplotlib.pyplot as plt
 from enum import Enum
 import cv2
+from scipy import linalg
 
 class GraphType(Enum):
-    LINE = 0
+    LINE      = 0
     WIREFRAME = 1
-    SURFACE = 2
-    CONTOUR = 3
+    SURFACE   = 2
+    CONTOUR   = 3
+
+class CoordinateSys(Enum):
+    IDENTITY = 0
+    ORTHOPRJ = 1
+    PRLLPRJ  = 2
+    SKEW     = 3
 
 class Graph:
     # proj: either "2d" or "3d"
@@ -31,6 +38,12 @@ class Graph:
             self.__graph = self.__figure.add_subplot()
         self.__graph_type = graph_type
 
+        # coordinate system details
+        self.__coordsys  = np.identity(4)
+        self.__scale     = np.identity(4)
+        self.__rotate    = np.identity(4)
+        self.__translate = np.identity(4)
+
         # axis details
         if apply_equation:
             if dim3:
@@ -39,8 +52,10 @@ class Graph:
                 self.__y_equation = y
                 self.__z_equation = z_equation(x, y)
             else:
+                size = len(x_equation)
                 self.__x_equation = x_equation
                 self.__y_equation = y_equation(x_equation)
+                self.__z_equation = np.zeros(size, dtype = float)
         else:
             if dim3:
                 x, y, z = np.meshgrid(x_equation, y_equation, z_equation)
@@ -48,8 +63,10 @@ class Graph:
                 self.__y_equation = y
                 self.__z_equation = z
             else:
+                size = len(x_equation)
                 self.__x_equation = x_equation
                 self.__y_equation = y_equation
+                self.__z_equation = np.zeros(size, dtype = float)
 
     @property
     def x_equation(self):
@@ -134,7 +151,27 @@ class Graph:
 
         return img_bgra
 
+    def scale(self, scale_vec):
+        self.__scale = np.identity(4)
+        self.__scale[0][0] *= scale_vec[0]
+        self.__scale[1][1] *= scale_vec[1]
+        self.__scale[2][2] *= scale_vec[2]
     
+    def rotate(self, rotate_vec, angle):
+        pass
+    
+    def translate(self, translate_vec):
+        pass
+
+    def coordinate_system(self, sys_type = CoordinateSys.IDENTITY, core_vec = np.ones(3)):
+        if sys_type == CoordinateSys.IDENTITY:
+            self.__coordsys = np.identity(4)
+        elif sys_type == CoordinateSys.ORTHOPRJ:
+            pass
+        elif sys_type == CoordinateSys.PRLLPRJ:
+            pass
+        elif sys_type == CoordinateSys.SKEW:
+            pass
 
 if __name__ == "__main__":
     print("Hello")
